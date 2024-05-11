@@ -1,16 +1,30 @@
+from langchain_community.document_loaders import TextLoader
+from langchain_mistralai.chat_models import ChatMistralAI
+from langchain_mistralai.embeddings import MistralAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains import create_retrieval_chain
+
+
+
+
+
 import streamlit as st
 from streamlit_chat import message
 from langchain.chains import ConversationalRetrievalChain
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.llms import LlamaCpp
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
+# from langchain.embeddings import HuggingFaceEmbeddings
+# from langchain.llms import LlamaCpp
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain.vectorstores import FAISS
 from langchain.memory import ConversationBufferMemory
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 import os
 import tempfile
 
 
+api_key = 'API_KEY'
 
 
 def initialize_session_state():
@@ -52,14 +66,7 @@ def display_chat_history(chain):
 
 def create_conversational_chain(vector_store):
     # Create llm
-    llm = LlamaCpp(
-    streaming = True,
-    model_path="mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-    temperature=0.75,
-    top_p=1, 
-    verbose=True,
-    n_ctx=4096
-)
+    llm = ChatMistralAI(mistral_api_key=api_key)
     
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
@@ -86,19 +93,19 @@ def main():
                 temp_file_path = temp_file.name
 
             loader = None
-            if file_extension == ".pdf":
-                loader = PyPDFLoader(temp_file_path)
+            if file_extension == ".txt":
+                loader = TextLoader(temp_file_path)
 
             if loader:
                 text.extend(loader.load())
                 os.remove(temp_file_path)
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=20)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
         text_chunks = text_splitter.split_documents(text)
 
         # Create embeddings
-        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", 
-                                           model_kwargs={'device': 'cpu'})
+        embeddings = MistralAIEmbeddings(model="mistral-embed", mistral_api_key=api_key)
+
 
         # Create vector store
         vector_store = FAISS.from_documents(text_chunks, embedding=embeddings)
