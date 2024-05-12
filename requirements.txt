@@ -8,7 +8,6 @@ faiss-cpu
 tiktoken
 huggingface-hub
 pypdf
-llama-cpp-python
 langchain-mistralai
 langchain-community
 mistralai
