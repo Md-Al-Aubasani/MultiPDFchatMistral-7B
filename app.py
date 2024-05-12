@@ -32,10 +32,10 @@ def initialize_session_state():
         st.session_state['history'] = []
 
     if 'generated' not in st.session_state:
-        st.session_state['generated'] = ["Hello! Ask me anything about 🤗"]
+        st.session_state['generated'] = ["Hello! upload your patient text files and ask me anything about them!"]
 
     if 'past' not in st.session_state:
-        st.session_state['past'] = ["Hey! 👋"]
+        st.session_state['past'] = ["Hey, there!"]
 
 def conversation_chat(query, chain, history):
     result = chain({"question": query, "chat_history": history})
@@ -48,7 +48,7 @@ def display_chat_history(chain):
 
     with container:
         with st.form(key='my_form', clear_on_submit=True):
-            user_input = st.text_input("Question:", placeholder="Ask about your PDF", key='input')
+            user_input = st.text_input("Question:", placeholder="Ask about your patient text file", key='input')
             submit_button = st.form_submit_button(label='Send')
 
         if submit_button and user_input:
@@ -61,8 +61,8 @@ def display_chat_history(chain):
     if st.session_state['generated']:
         with reply_container:
             for i in range(len(st.session_state['generated'])):
-                message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="thumbs")
-                message(st.session_state["generated"][i], key=str(i), avatar_style="fun-emoji")
+                message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="pixel-art")
+                message(st.session_state["generated"][i], key=str(i), avatar_style="bottts")
 
 def create_conversational_chain(vector_store):
     # Create llm
@@ -78,7 +78,7 @@ def create_conversational_chain(vector_store):
 def main():
     # Initialize session state
     initialize_session_state()
-    st.title("Multi-PDF ChatBot using Mistral-7B-Instruct :books:")
+    st.title("Medical Advice ChatBot using Mistral-8x7B-Instruct :male-doctor:")
     # Initialize Streamlit
     st.sidebar.title("Document Processing")
     uploaded_files = st.sidebar.file_uploader("Upload files", accept_multiple_files=True)
